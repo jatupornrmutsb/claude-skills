@@ -107,10 +107,10 @@ cd claude-skills
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-หรือติดตั้งโดยไม่ต้อง clone เอง:
+หรือติดตั้งโดยไม่ต้อง clone เอง (repo เป็น Private จึงต้องใช้ [GitHub CLI](https://cli.github.com/) ที่ `gh auth login` แล้ว):
 
 ```powershell
-irm https://raw.githubusercontent.com/jatupornrmutsb/claude-skills/master/install.ps1 | iex
+$t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); gh repo clone jatupornrmutsb/claude-skills $t -- --depth 1 --quiet; & "$t\install.ps1"; Remove-Item -Recurse -Force $t
 ```
 
 ### Linux / WSL
@@ -121,10 +121,10 @@ cd claude-skills
 ./install.sh
 ```
 
-หรือติดตั้งโดยไม่ต้อง clone เอง:
+หรือติดตั้งโดยไม่ต้อง clone เอง (repo เป็น Private จึงต้องใช้ [GitHub CLI](https://cli.github.com/) ที่ `gh auth login` แล้ว):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/jatupornrmutsb/claude-skills/master/install.sh | bash
+t=$(mktemp -d) && gh repo clone jatupornrmutsb/claude-skills "$t" -- --depth 1 --quiet && "$t/install.sh"; rm -rf "$t"
 ```
 
 > **WSL:** WSL กับ Windows มี `~/.claude` แยกกัน ถ้าใช้ Claude Code ทั้งสองฝั่ง ต้องติดตั้งทั้งสองฝั่ง
