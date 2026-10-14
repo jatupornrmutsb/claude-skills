@@ -1,0 +1,39 @@
+# ดึง skills/ และ LICENSE จาก utarn/engineer-skills มาอัปเดตอัตโนมัติทุกสัปดาห์
+# (ทำแบบเดียวกับหัวข้อ "อัปเดตจากต้นฉบับ" ใน README)
+name: Sync upstream skills
+
+on:
+  schedule:
+    - cron: '0 1 * * 1'   # ทุกวันจันทร์ 08:00 เวลาไทย
+  workflow_dispatch:       # กดรันเองได้ที่แท็บ Actions
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ดึงต้นฉบับ
+        run: |
+          git remote add upstream https://github.com/utarn/engineer-skills.git
+          git fetch --quiet upstream main
+
+      - name: แทนที่ skills/ และ LICENSE
+        run: |
+          git rm -r -q skills
+          git checkout upstream/main -- skills LICENSE
+
+      - name: commit ถ้ามีการเปลี่ยนแปลง
+        run: |
+          if git diff --cached --quiet; then
+            echo "ไม่มีอะไรใหม่จากต้นฉบับ"
+            exit 0
+          fi
+          git diff --cached --stat
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "อัปเดต skills จาก utarn/engineer-skills ($(git rev-parse --short upstream/main))"
+          git push
