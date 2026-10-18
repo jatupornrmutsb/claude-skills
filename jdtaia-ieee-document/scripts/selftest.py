@@ -9,8 +9,13 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
+
+for _s in (sys.stdout, sys.stderr):  # Windows console ไม่ใช่ UTF-8 จะ print ภาษาไทยไม่ได้
+    if hasattr(_s, "reconfigure"):
+        _s.reconfigure(encoding="utf-8", errors="replace")
 import tempfile
 from pathlib import Path
 
@@ -34,7 +39,7 @@ def check(name, cond, detail=""):
 
 
 def sh(*args):
-    r = subprocess.run([PY, *map(str, args)], capture_output=True, text=True)
+    r = subprocess.run([PY, *map(str, args)], capture_output=True, text=True, encoding="utf-8", errors="replace", env={**os.environ, "PYTHONUTF8": "1"})
     return r.returncode, r.stdout + r.stderr
 
 
@@ -248,7 +253,7 @@ def main():
     val = Path("/mnt/skills/public/docx/scripts/office/validate.py")
     if val.exists():
         for f, orig in ((fmt, src), (two, src), (ren, add)):
-            r = subprocess.run([PY, str(val), str(f), "--original", str(orig)], capture_output=True, text=True, cwd=val.parent)
+            r = subprocess.run([PY, str(val), str(f), "--original", str(orig)], capture_output=True, text=True, encoding="utf-8", errors="replace", env={**os.environ, "PYTHONUTF8": "1"}, cwd=val.parent)
             check(f"schema: {f.name} ไม่มี error ใหม่", "PASSED" in r.stdout, r.stdout[-300:])
 
     # 4) เข้าถึงไฟล์ไม่ได้

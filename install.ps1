@@ -47,6 +47,20 @@ try {
         $count++
     }
 
+    # ── ติดตั้งแพ็กเกจ Python ที่ skill ต้องใช้ (ถ้ามี requirements.txt) ──
+    $py = Get-Command python, py -ErrorAction SilentlyContinue | Select-Object -First 1
+    foreach ($dir in $skillDirs) {
+        $req = Join-Path $dir.FullName 'requirements.txt'
+        if (-not (Test-Path $req)) { continue }
+        if ($py) {
+            Write-Host "  ติดตั้งแพ็กเกจ Python ของ $($dir.Name)"
+            & $py.Source -m pip install --quiet --user -r $req
+            if ($LASTEXITCODE -ne 0) { Write-Warning "ติดตั้งแพ็กเกจของ $($dir.Name) ไม่สำเร็จ" }
+        } else {
+            Write-Warning "ไม่พบ Python: skill $($dir.Name) ต้องใช้แพ็กเกจใน $req"
+        }
+    }
+
     # ── คัดลอก slash commands ─────────────────────────────────────────────
     $cmdSrc = Join-Path $Src 'commands'
     if (Test-Path $cmdSrc) {

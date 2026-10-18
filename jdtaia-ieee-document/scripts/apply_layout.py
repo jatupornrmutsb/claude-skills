@@ -33,6 +33,10 @@ import argparse
 import copy
 import json
 import sys
+
+for _s in (sys.stdout, sys.stderr):  # Windows console ไม่ใช่ UTF-8 จะ print ภาษาไทยไม่ได้
+    if hasattr(_s, "reconfigure"):
+        _s.reconfigure(encoding="utf-8", errors="replace")
 from collections import Counter
 from pathlib import Path
 

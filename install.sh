@@ -60,6 +60,19 @@ for dir in "$SRC"/*/; do
     [ -f "$dir/SKILL.md" ] && install_skill "$dir"
 done
 
+# ── ติดตั้งแพ็กเกจ Python ที่ skill ต้องใช้ (ถ้ามี requirements.txt) ──
+PY="$(command -v python3 || command -v python || true)"
+for req in "$DEST"/*/requirements.txt; do
+    [ -f "$req" ] || continue
+    name="$(basename "$(dirname "$req")")"
+    if [ -n "$PY" ]; then
+        echo "  ติดตั้งแพ็กเกจ Python ของ $name"
+        "$PY" -m pip install --quiet --user -r "$req" || echo "คำเตือน: ติดตั้งแพ็กเกจของ $name ไม่สำเร็จ" >&2
+    else
+        echo "คำเตือน: ไม่พบ Python: skill $name ต้องใช้แพ็กเกจใน $req" >&2
+    fi
+done
+
 # ── คัดลอก slash commands ─────────────────────────────────────────────────
 if [ -d "$SRC/commands" ]; then
     cp "$SRC"/commands/*.md "$CMD_DEST/" 2>/dev/null || true

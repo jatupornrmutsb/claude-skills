@@ -102,16 +102,18 @@ skill ชื่อเดียวกันที่มีอยู่แล้�
 
 ### Windows (PowerShell)
 
+ใช้คำสั่งเดียว ใช้ได้ทั้งติดตั้งครั้งแรกและอัปเดต ต้องมี [GitHub CLI](https://cli.github.com/) ที่ล็อกอินแล้ว (`gh auth login`) เพราะ repo เป็น Private:
+
+```powershell
+$t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); gh repo clone jatupornrmutsb/claude-skills $t -- --depth 1 --quiet; powershell -ExecutionPolicy Bypass -File "$t\install.ps1"; Remove-Item -Recurse -Force $t
+```
+
+หรือ clone ไว้ในเครื่อง:
+
 ```powershell
 git clone https://github.com/jatupornrmutsb/claude-skills.git
 cd claude-skills
 powershell -ExecutionPolicy Bypass -File .\install.ps1
-```
-
-หรือติดตั้งโดยไม่ต้อง clone เอง (repo เป็น Private จึงต้องใช้ [GitHub CLI](https://cli.github.com/) ที่ `gh auth login` แล้ว):
-
-```powershell
-$t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); gh repo clone jatupornrmutsb/claude-skills $t -- --depth 1 --quiet; & "$t\install.ps1"; Remove-Item -Recurse -Force $t
 ```
 
 ### Linux / WSL
@@ -144,7 +146,7 @@ Compress-Archive -Path .\jdtaia-ieee-document -DestinationPath jdtaia-ieee-docum
 จากนั้นไปที่ **Settings → Capabilities → Skills → Upload skill** แล้วเลือกไฟล์ zip นั้น
 skill ที่อัปโหลดจะผูกกับบัญชี จึงใช้ได้ทุกเครื่องที่ล็อกอินบัญชีเดียวกันโดยไม่ต้องอัปโหลดซ้ำ
 
-> skill นี้มีสคริปต์ Python ใน `scripts/` ที่ต้องใช้ `python-docx` (`pip install python-docx`)
+> skill ที่มี `requirements.txt` (เช่น `jdtaia-ieee-document` ใช้ `python-docx`) สคริปต์ติดตั้งจะ `pip install` ให้เองถ้าเครื่องมี Python
 
 ### อัปเดตเครื่องที่ติดตั้งไว้แล้ว
 

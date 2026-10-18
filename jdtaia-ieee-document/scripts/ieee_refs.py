@@ -20,6 +20,10 @@ import argparse
 import json
 import re
 import sys
+
+for _s in (sys.stdout, sys.stderr):  # Windows console ไม่ใช่ UTF-8 จะ print ภาษาไทยไม่ได้
+    if hasattr(_s, "reconfigure"):
+        _s.reconfigure(encoding="utf-8", errors="replace")
 from collections import OrderedDict
 from pathlib import Path
 
