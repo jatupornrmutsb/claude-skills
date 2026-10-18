@@ -3,7 +3,7 @@
 ชุด skill สำหรับ [Claude Code](https://code.claude.com) ของ jatupornrmutsb
 
 - skill งานวิศวกรรมซอฟต์แวร์ในโฟลเดอร์ [`skills/`](./skills) นำมาจาก [utarn/engineer-skills](https://github.com/utarn/engineer-skills) (ดู[เครดิต](#เครดิตและสัญญาอนุญาต))
-- skill ที่เขียนเอง: [`thai-docx/`](./thai-docx) และ slash command ใน [`commands/`](./commands)
+- skill ที่เขียนเอง: [`thai-docx/`](./thai-docx), [`jdtaia-ieee-document/`](./jdtaia-ieee-document) และ slash command ใน [`commands/`](./commands)
 
 ## วิธีใช้
 
@@ -91,6 +91,7 @@
 | `/writing-beats` 🧪 | เขียนขั้นที่ 2: เรียงไอเดียเป็นลำดับเรื่อง | `/writing-beats` |
 | `/writing-shape` 🧪 | เขียนขั้นที่ 3: เรียบเรียงเป็นบทความทีละย่อหน้า | `/writing-shape` |
 | `/thai-docx` ⚡ | สร้างหรือแก้ไฟล์ Word ภาษาไทยให้ฟอนต์ สระ และตารางไม่เพี้ยน | `/thai-docx ทำบันทึกข้อความขออนุมัติโครงการ` |
+| `/jdtaia-ieee-document` ⚡ | เขียน ตรวจแก้ และจัดรูปแบบบทความวารสาร JDTAIA (อ้างอิง IEEE) และเอกสารประกอบสารนิพนธ์ | `/jdtaia-ieee-document จัดรูปแบบ article.docx อย่างเดียว` |
 
 ## ติดตั้งบนเครื่องอื่น
 
@@ -131,6 +132,19 @@ t=$(mktemp -d) && gh repo clone jatupornrmutsb/claude-skills "$t" -- --depth 1 -
 
 ถ้าไม่ต้องการ skill กลุ่มทดลอง (🧪) ให้ใส่ `-SkipInProgress` (Windows) หรือ `--skip-in-progress` (Linux/WSL)
 ติดตั้งเสร็จแล้วให้เปิด Claude Code ใหม่ แล้วพิมพ์ `/` เพื่อดูว่ามีคำสั่งขึ้นมาแล้ว
+
+### ใช้ในแอป Claude (claude.ai / Desktop)
+
+สคริปต์ติดตั้งข้างบนใช้ได้กับ Claude Code เท่านั้น ถ้าจะใช้ skill ในหน้าแชตของแอป Claude ต้องอัปโหลดเป็นไฟล์ zip:
+
+```powershell
+Compress-Archive -Path .\jdtaia-ieee-document -DestinationPath jdtaia-ieee-document.zip -Force
+```
+
+จากนั้นไปที่ **Settings → Capabilities → Skills → Upload skill** แล้วเลือกไฟล์ zip นั้น
+skill ที่อัปโหลดจะผูกกับบัญชี จึงใช้ได้ทุกเครื่องที่ล็อกอินบัญชีเดียวกันโดยไม่ต้องอัปโหลดซ้ำ
+
+> skill นี้มีสคริปต์ Python ใน `scripts/` ที่ต้องใช้ `python-docx` (`pip install python-docx`)
 
 ### อัปเดตเครื่องที่ติดตั้งไว้แล้ว
 
