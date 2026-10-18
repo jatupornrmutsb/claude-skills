@@ -1,0 +1,48 @@
+# สร้างไฟล์ zip ของ skill ที่เขียนเอง (โฟลเดอร์ที่ root ที่มี SKILL.md) สำหรับอัปโหลดเข้าแอป Claude
+# ไฟล์อยู่ที่หน้า Releases → "Skill zips (ล่าสุด)" และจะถูกแทนที่ทุกครั้งที่แก้ skill
+name: Build skill zips
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '*/SKILL.md'
+      - '*/**'
+      - '!skills/**'
+      - '!.github/**'
+      - '!commands/**'
+  workflow_dispatch:       # กดรันเองได้ที่แท็บ Actions
+
+permissions:
+  contents: write
+
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: ทำ zip ทีละ skill
+        run: |
+          mkdir -p dist
+          for dir in */; do
+            name="${dir%/}"
+            [ -f "$name/SKILL.md" ] || continue
+            [ "$name" = skills ] && continue
+            zip -qr "dist/$name.zip" "$name" -x '*/__pycache__/*' '*/.claude/*'
+            echo "สร้าง $name.zip"
+          done
+          ls -l dist
+
+      - name: อัปโหลดไปที่ Release "skills-latest"
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          notes="ไฟล์ zip ของ skill สำหรับอัปโหลดเข้าแอป Claude (Settings → Capabilities → Skills → Upload skill)
+          สร้างจาก commit ${GITHUB_SHA::7} เมื่อ $(TZ=Asia/Bangkok date '+%Y-%m-%d %H:%M') น."
+          if gh release view skills-latest >/dev/null 2>&1; then
+            gh release edit skills-latest --notes "$notes"
+          else
+            gh release create skills-latest --title "Skill zips (ล่าสุด)" --notes "$notes" --target "$GITHUB_SHA"
+          fi
+          gh release upload skills-latest dist/*.zip --clobber

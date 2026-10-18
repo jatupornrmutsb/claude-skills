@@ -8,6 +8,7 @@
 ## เริ่มต้นแบบง่าย (Windows)
 
 **ใช้ในแอป Claude (หน้าแชต claude.ai / Claude Desktop)** → ไม่ต้องทำอะไร skill ที่อัปโหลดไว้แล้วผูกกับบัญชี ล็อกอินบัญชีเดิมก็ใช้ได้เลย
+แก้ skill แล้วอยากอัปเดตในแอป → ดาวน์โหลด zip จาก [Releases](../../releases/tag/skills-latest) แล้วอัปโหลดทับ (ดู[วิธี](#ใช้ในแอป-claude-claudeai--desktop))
 
 **ใช้ใน Claude Code** → ทำ 4 ขั้นนี้ครั้งเดียวต่อเครื่อง
 
@@ -163,13 +164,11 @@ t=$(mktemp -d) && gh repo clone jatupornrmutsb/claude-skills "$t" -- --depth 1 -
 
 ### ใช้ในแอป Claude (claude.ai / Desktop)
 
-สคริปต์ติดตั้งข้างบนใช้ได้กับ Claude Code เท่านั้น ถ้าจะใช้ skill ในหน้าแชตของแอป Claude ต้องอัปโหลดเป็นไฟล์ zip:
+สคริปต์ติดตั้งข้างบนใช้ได้กับ Claude Code เท่านั้น ถ้าจะใช้ skill ในหน้าแชตของแอป Claude ต้องอัปโหลดเป็นไฟล์ zip
 
-```powershell
-Compress-Archive -Path .\jdtaia-ieee-document -DestinationPath jdtaia-ieee-document.zip -Force
-```
-
-จากนั้นไปที่ **Settings → Capabilities → Skills → Upload skill** แล้วเลือกไฟล์ zip นั้น
+1. ดาวน์โหลด zip ของ skill จากหน้า [Releases → Skill zips (ล่าสุด)](../../releases/tag/skills-latest)
+   GitHub สร้างไฟล์ให้เองทุกครั้งที่แก้ skill ที่ root ของ repo (เช่น `jdtaia-ieee-document/`, `thai-docx/`)
+2. ในแอป Claude ไปที่ **Settings → Capabilities → Skills** ลบตัวเก่าออก (ถ้ามี) แล้วกด **Upload skill** เลือกไฟล์ zip นั้น
 skill ที่อัปโหลดจะผูกกับบัญชี จึงใช้ได้ทุกเครื่องที่ล็อกอินบัญชีเดียวกันโดยไม่ต้องอัปโหลดซ้ำ
 
 > skill ที่มี `requirements.txt` (เช่น `jdtaia-ieee-document` ใช้ `python-docx`) สคริปต์ติดตั้งจะ `pip install` ให้เองถ้าเครื่องมี Python
