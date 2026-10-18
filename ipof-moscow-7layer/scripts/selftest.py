@@ -216,7 +216,8 @@ def main():
     # 0) ทะเบียนตัวอย่างผ่านการตรวจ
     rc, out = sh(HERE / "analyze.py", "validate", "--project", EX)
     check("validate: ทะเบียนตัวอย่างไม่มี error", rc == 0, out)
-    check("validate: เตือนเมื่อยังไม่ได้ถามคำถามหลัก/n/k/วารสาร", "จำนวนผู้ตอบ (n)" in out and "วารสารเป้าหมาย" in out, out)
+    check("validate: เตือนเมื่อยังไม่ได้ถามชื่อเรื่อง/คำถามหลัก/n/k/วารสาร",
+          all(w in out for w in ("ชื่อเรื่องวิจัย", "คำถามหลักของระบบ", "จำนวนผู้ตอบ (n)", "จำนวนผู้เชี่ยวชาญ (k)", "วารสารเป้าหมาย")), out)
     bad = json.loads(json.dumps(proj))
     bad["requirements"][2]["component"] = ""
     bad["requirements"][3]["depends_on"] = ["FR02"]  # Must พึ่งพา Should
@@ -398,6 +399,21 @@ def main():
     doc.save(good)
     rc, out = sh(HERE / "prepub_check.py", good, "--render", wd / "pdf")
     check("prepub_check: เอกสารที่ถูกกฎผ่าน + รายงานจำนวนหน้า", rc == 0 and "หน้า" in out, out)
+
+    # 9) ชื่อเรื่องไม่ถูกเปลี่ยน
+    tp = json.loads(EX.read_text(encoding="utf-8"))
+    tp["project"]["title"] = "การออกแบบสถาปัตยกรรมเชิงแนวคิดของแดชบอร์ดทดสอบ"
+    (wd / "titled.json").write_text(json.dumps(tp, ensure_ascii=False), encoding="utf-8")
+    for name, first in (("t_ok.docx", tp["project"]["title"]), ("t_bad.docx", "การพัฒนาแดชบอร์ดทดสอบ")):
+        d = Document()
+        d.add_paragraph(first)
+        d.add_paragraph("ระบบต้นแบบในระดับแนวคิด")
+        d.save(wd / name)
+    rc1, o1 = sh(HERE / "prepub_check.py", "--project", wd / "titled.json", wd / "t_ok.docx")
+    rc2, o2 = sh(HERE / "prepub_check.py", "--project", wd / "titled.json", wd / "t_bad.docx")
+    rc3, o3 = sh(HERE / "prepub_check.py", "--project", EX, wd / "t_ok.docx")
+    check("ชื่อเรื่อง: ตรงกับที่ยืนยัน = ผ่าน, ถูกเปลี่ยน = TITLE_MISMATCH, ยังไม่ยืนยัน = TITLE_UNSET",
+          rc1 == 0 and rc2 == 1 and "TITLE_MISMATCH" in o2 and "TITLE_UNSET" in o3, o1 + o2 + o3)
 
     n = sum(1 for _, c in RES if c)
     print(f"\nสรุป: ผ่าน {n}/{len(RES)} (workdir: {wd})")

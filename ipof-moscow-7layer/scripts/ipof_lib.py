@@ -140,7 +140,7 @@ def validate_project(p):
         if nums and nums != list(range(1, len(nums) + 1)):
             W(f"{key}: เลขรหัสไม่ต่อเนื่อง {codes}")
     pj = p.get("project", {})
-    for key, label in (("main_question", "คำถามหลักของระบบ"), ("n_users", "จำนวนผู้ตอบ (n)"),
+    for key, label in (("title", "ชื่อเรื่องวิจัย"), ("main_question", "คำถามหลักของระบบ"), ("n_users", "จำนวนผู้ตอบ (n)"),
                        ("n_experts", "จำนวนผู้เชี่ยวชาญ (k)"), ("journal", "วารสารเป้าหมาย")):
         if pj.get(key) in (None, ""):
             W(f"ยังไม่มี{label} — ถามผู้ใช้ ห้ามใส่ค่าสมมติ")

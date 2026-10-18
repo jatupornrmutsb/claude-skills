@@ -15,6 +15,7 @@
 - ถ้อยคำเกินหลักฐาน (ติดตั้งใช้งานแล้ว ฯลฯ) — ต้องคงระดับแนวคิด/ต้นแบบ
 - ช่วงตัวเลขที่ใช้ "-" แทน "–"
 - ตัวเลขทศนิยม 2 ตำแหน่งที่ไม่พบในไฟล์ Excel (หลัง recalc)
+- --project: ชื่อเรื่องในไฟล์ต้องตรงกับ project.title ที่ยืนยันแล้ว (ไม่ถูกเปลี่ยน)
 - --render: แปลงเป็น PDF รายงานจำนวนหน้า
 ออกด้วยรหัส 1 เมื่อมี error
 """
@@ -57,7 +58,24 @@ def paragraphs(doc):
     return out
 
 
-def check_file(path, forbid, allow_colon, issues, excel_vals):
+def norm_title(t):
+    return re.sub(r"\s+", " ", (t or "").replace("\n", " ")).strip()
+
+
+def check_title(paras, title, E, W):
+    want = norm_title(title)
+    if not want:
+        W("TITLE_UNSET", "ยังไม่มีชื่อเรื่องใน project.json — ยืนยันชื่อเรื่องกับผู้ใช้ก่อน")
+        return
+    texts = [norm_title(t) for t in paras]
+    if want in texts or any(want in t for t in texts):
+        return
+    first = next((t for t in texts if t), "")
+    near = max(texts, key=lambda t: len(set(t.split()) & set(want.split())) if t else -1) if texts else ""
+    E("TITLE_MISMATCH", f"ไม่พบชื่อเรื่องที่ยืนยันไว้ “{want[:60]}” — ย่อหน้าแรก “{first[:60]}” / ใกล้เคียงที่สุด “{near[:60]}”")
+
+
+def check_file(path, forbid, allow_colon, issues, excel_vals, title=None):
     doc = Document(path)
     paras = paragraphs(doc)
     name = Path(path).name
@@ -67,6 +85,8 @@ def check_file(path, forbid, allow_colon, issues, excel_vals):
     body = paras if ref_i is None else paras[:ref_i]
     refs = [] if ref_i is None else [t.strip() for t in paras[ref_i + 1:] if re.match(r"^\s*\[\d+\]", t)]
     full = "\n".join(paras)
+    if title is not False:
+        check_title(paras, title, E, W)
     if forbid:
         for w in forbid.split("|"):
             n = full.count(w)
@@ -178,11 +198,19 @@ def main(argv=None):
     ap.add_argument("--forbid", default="")
     ap.add_argument("--allow-colon", default="คำสำคัญ|Keywords|บทคัดย่อ|Abstract|ผู้ประพันธ์บรรณกิจ|E-mail|อีเมล")
     ap.add_argument("--render", metavar="OUTDIR")
+    ap.add_argument("--project", help="project.json — ตรวจชื่อเรื่องไม่ถูกเปลี่ยน")
+    ap.add_argument("--no-title-check", nargs="*", default=[], metavar="FILE",
+                    help="ไฟล์ที่ไม่ต้องมีชื่อเรื่อง (เช่น ตรวจเทียบอ้างอิง)")
     a = ap.parse_args(argv)
     ev = excel_values(a.excel) if a.excel else None
     issues = []
+    title = False
+    if a.project:
+        import json
+        title = json.loads(Path(a.project).read_text(encoding="utf-8")).get("project", {}).get("title")
+    skip = {Path(x).name for x in a.no_title_check}
     for f in a.docx:
-        check_file(f, a.forbid, a.allow_colon, issues, ev)
+        check_file(f, a.forbid, a.allow_colon, issues, ev, False if Path(f).name in skip else title)
         if a.render:
             Path(a.render).mkdir(parents=True, exist_ok=True)
             r = render_pages(f, a.render)
