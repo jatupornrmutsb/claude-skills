@@ -5,6 +5,32 @@
 - skill งานวิศวกรรมซอฟต์แวร์ในโฟลเดอร์ [`skills/`](./skills) นำมาจาก [utarn/engineer-skills](https://github.com/utarn/engineer-skills) (ดู[เครดิต](#เครดิตและสัญญาอนุญาต))
 - skill ที่เขียนเอง: [`thai-docx/`](./thai-docx), [`jdtaia-ieee-document/`](./jdtaia-ieee-document) และ slash command ใน [`commands/`](./commands)
 
+## เริ่มต้นแบบง่าย (Windows)
+
+**ใช้ในแอป Claude (หน้าแชต claude.ai / Claude Desktop)** → ไม่ต้องทำอะไร skill ที่อัปโหลดไว้แล้วผูกกับบัญชี ล็อกอินบัญชีเดิมก็ใช้ได้เลย
+
+**ใช้ใน Claude Code** → ทำ 4 ขั้นนี้ครั้งเดียวต่อเครื่อง
+
+1. เปิด **PowerShell** (กด Start พิมพ์ `PowerShell` แล้วเปิด)
+2. ติดตั้ง GitHub CLI (ข้ามได้ถ้ามีแล้ว) แล้ว**ปิดและเปิด PowerShell ใหม่**
+   ```powershell
+   winget install GitHub.cli
+   ```
+3. ล็อกอิน GitHub (ทำครั้งเดียว) ตอบตามค่าเริ่มต้นโดยกด Enter แล้วล็อกอินในเบราว์เซอร์ที่เปิดขึ้นมา
+   ```powershell
+   gh auth login
+   ```
+4. คัดลอกบรรทัดนี้ไปวางแล้วกด Enter
+   ```powershell
+   $t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); gh repo clone jatupornrmutsb/claude-skills $t -- --depth 1 --quiet; powershell -ExecutionPolicy Bypass -File "$t\install.ps1"; Remove-Item -Recurse -Force $t
+   ```
+   ขึ้นข้อความ `เสร็จแล้ว ติดตั้ง ... skill` แปลว่าติดตั้งเสร็จแล้ว
+
+จากนั้นเปิด Claude Code ใหม่ แล้วพิมพ์ `/jdtaia` จะเห็นคำสั่งขึ้นมา
+**อยากได้เวอร์ชันใหม่ล่าสุด** → ทำแค่ขั้นที่ 4 ซ้ำ
+
+รายละเอียดเพิ่มเติม (Linux/WSL, ตัวเลือกอื่น) อยู่ที่หัวข้อ [ติดตั้งบนเครื่องอื่น](#ติดตั้งบนเครื่องอื่น)
+
 ## วิธีใช้
 
 พิมพ์ `/ชื่อคำสั่ง` ใน Claude Code แล้วตามด้วยสิ่งที่ต้องการ เช่น `/tdd เพิ่มฟังก์ชันคำนวณเกรด`
