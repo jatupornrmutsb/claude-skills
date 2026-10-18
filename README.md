@@ -3,7 +3,7 @@
 ชุด skill สำหรับ [Claude Code](https://code.claude.com) ของ jatupornrmutsb
 
 - skill งานวิศวกรรมซอฟต์แวร์ในโฟลเดอร์ [`skills/`](./skills) นำมาจาก [utarn/engineer-skills](https://github.com/utarn/engineer-skills) (ดู[เครดิต](#เครดิตและสัญญาอนุญาต))
-- skill ที่เขียนเอง: [`thai-docx/`](./thai-docx), [`jdtaia-ieee-document/`](./jdtaia-ieee-document) และ slash command ใน [`commands/`](./commands)
+- skill ที่เขียนเอง: [`thai-docx/`](./thai-docx), [`jdtaia-ieee-document/`](./jdtaia-ieee-document), [`ipof-moscow-7layer/`](./ipof-moscow-7layer) และ slash command ใน [`commands/`](./commands)
 
 ## เริ่มต้นแบบง่าย (Windows)
 
@@ -119,6 +119,7 @@
 | `/writing-shape` 🧪 | เขียนขั้นที่ 3: เรียบเรียงเป็นบทความทีละย่อหน้า | `/writing-shape` |
 | `/thai-docx` ⚡ | สร้างหรือแก้ไฟล์ Word ภาษาไทยให้ฟอนต์ สระ และตารางไม่เพี้ยน | `/thai-docx ทำบันทึกข้อความขออนุมัติโครงการ` |
 | `/jdtaia-ieee-document` ⚡ | เขียน ตรวจแก้ และจัดรูปแบบบทความวารสาร JDTAIA (อ้างอิง IEEE) และเอกสารประกอบสารนิพนธ์ | `/jdtaia-ieee-document จัดรูปแบบ article.docx อย่างเดียว` |
+| `/ipof-moscow-7layer` ⚡ | วิเคราะห์ความต้องการผู้ใช้และออกแบบสถาปัตยกรรมด้วย IPOF + MoSCoW + 7 ชั้น พร้อมสรุปแบบสอบถาม/แบบประเมินเป็น Excel | `/ipof-moscow-7layer สรุปผลแบบประเมินผู้เชี่ยวชาญ.docx` |
 
 ## ติดตั้งบนเครื่องอื่น
 
