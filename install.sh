@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# ติดตั้ง skills ทั้งหมดจาก repo นี้ไปไว้ที่ ~/.claude/skills (และ commands ไปที่ ~/.claude/commands)
+# ติดตั้ง skills ทั้งหมดจาก repo นี้ไปไว้ที่ ~/.claude/skills
 #
 # ใช้งาน:
 #   ./install.sh                     # รันจากโฟลเดอร์ repo ที่ clone มาแล้ว
@@ -35,7 +35,7 @@ if [ -z "$SRC" ]; then
     SRC="$TMP/repo"
 fi
 
-mkdir -p "$DEST" "$CMD_DEST"
+mkdir -p "$DEST"
 
 # ── คัดลอก skill ทีละตัว (skills/<หมวด>/<ชื่อ>/ และ skill ของเราเองที่ root) ──
 count=0
@@ -72,11 +72,6 @@ for req in "$DEST"/*/requirements.txt; do
         echo "คำเตือน: ไม่พบ Python: skill $name ต้องใช้แพ็กเกจใน $req" >&2
     fi
 done
-
-# ── คัดลอก slash commands ─────────────────────────────────────────────────
-if [ -d "$SRC/commands" ]; then
-    cp "$SRC"/commands/*.md "$CMD_DEST/" 2>/dev/null || true
-fi
 
 # ── ลบ command เก่าที่เลิกใช้แล้ว (ชื่อซ้ำกับ skill ทำให้สับสน) ──────────────
 for old in thai-docx.md; do

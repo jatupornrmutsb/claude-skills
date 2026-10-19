@@ -1,4 +1,4 @@
-﻿# ติดตั้ง skills ทั้งหมดจาก repo นี้ไปไว้ที่ ~/.claude/skills (และ commands ไปที่ ~/.claude/commands)
+﻿# ติดตั้ง skills ทั้งหมดจาก repo นี้ไปไว้ที่ ~/.claude/skills
 #
 # ใช้งาน:
 #   .\install.ps1                     # รันจากโฟลเดอร์ repo ที่ clone มาแล้ว
@@ -29,7 +29,7 @@ if ($PSScriptRoot -and (Test-Path (Join-Path $PSScriptRoot 'skills'))) {
 }
 
 try {
-    New-Item -ItemType Directory -Force -Path $Dest, $CmdDest | Out-Null
+    New-Item -ItemType Directory -Force -Path $Dest | Out-Null
 
     # ── รวบรวม skill: skills/<หมวด>/<ชื่อ>/ และ skill ของเราเองที่ root ──
     $skillDirs = @(Get-ChildItem (Join-Path $Src 'skills') -Directory |
@@ -59,12 +59,6 @@ try {
         } else {
             Write-Warning "ไม่พบ Python: skill $($dir.Name) ต้องใช้แพ็กเกจใน $req"
         }
-    }
-
-    # ── คัดลอก slash commands ─────────────────────────────────────────────
-    $cmdSrc = Join-Path $Src 'commands'
-    if (Test-Path $cmdSrc) {
-        Copy-Item (Join-Path $cmdSrc '*.md') $CmdDest -Force
     }
 
     # ── ลบ command เก่าที่เลิกใช้แล้ว (ชื่อซ้ำกับ skill ทำให้สับสน) ──────────
