@@ -1,0 +1,1 @@
+{"action": "create", "reason": "Repeated workflow the user set up: GitHub builds zips, Desktop needs manual re-upload, and edits made only in Desktop copies were lost. Needs one durable rule so future edits start from the repo.", "evidence": "references/evidence-f475f343.md"}

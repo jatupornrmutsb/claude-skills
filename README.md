@@ -3,7 +3,7 @@
 ชุด skill สำหรับ [Claude Code](https://code.claude.com) ของ jatupornrmutsb
 
 - skill งานวิศวกรรมซอฟต์แวร์ในโฟลเดอร์ [`skills/`](./skills) นำมาจาก [utarn/engineer-skills](https://github.com/utarn/engineer-skills) (ดู[เครดิต](#เครดิตและสัญญาอนุญาต))
-- skill ที่เขียนเอง: [`thai-docx/`](./thai-docx), [`jdtaia-ieee-document/`](./jdtaia-ieee-document), [`ipof-moscow-7layer/`](./ipof-moscow-7layer) และ slash command ใน [`commands/`](./commands)
+- skill ที่เขียนเอง: [`thai-docx/`](./thai-docx), [`jdtaia-ieee-document/`](./jdtaia-ieee-document) และ [`ipof-moscow-7layer/`](./ipof-moscow-7layer)
 
 ## เริ่มต้นแบบง่าย (Windows)
 
@@ -123,7 +123,7 @@
 
 ## ติดตั้งบนเครื่องอื่น
 
-สคริปต์จะคัดลอก skill ทุกตัวไปไว้ที่ `~/.claude/skills/` (แบบแบน ไม่มีโฟลเดอร์หมวด) และ slash command ไปไว้ที่ `~/.claude/commands/`
+สคริปต์จะคัดลอก skill ทุกตัวไปไว้ที่ `~/.claude/skills/` (แบบแบน ไม่มีโฟลเดอร์หมวด)
 skill ชื่อเดียวกันที่มีอยู่แล้วในเครื่องจะถูกแทนที่ด้วยเวอร์ชันจาก repo นี้ ส่วน skill อื่นที่ไม่ได้มาจาก repo นี้จะไม่ถูกแตะ
 
 สิ่งที่ต้องมี: [Git](https://git-scm.com) และ [Claude Code](https://code.claude.com)

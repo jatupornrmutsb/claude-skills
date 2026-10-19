@@ -67,6 +67,12 @@ try {
         Copy-Item (Join-Path $cmdSrc '*.md') $CmdDest -Force
     }
 
+    # ── ลบ command เก่าที่เลิกใช้แล้ว (ชื่อซ้ำกับ skill ทำให้สับสน) ──────────
+    foreach ($old in @('thai-docx.md')) {
+        $f = Join-Path $CmdDest $old
+        if (Test-Path $f) { Remove-Item -Force $f; Write-Host "  ลบ command เก่า $old" }
+    }
+
     Write-Host "เสร็จแล้ว ติดตั้ง $count skill ไปที่ $Dest"
     Write-Host 'เปิด Claude Code ใหม่ (หรือเริ่ม session ใหม่) เพื่อให้เห็น skill'
 } finally {

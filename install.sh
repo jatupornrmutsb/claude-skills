@@ -78,5 +78,10 @@ if [ -d "$SRC/commands" ]; then
     cp "$SRC"/commands/*.md "$CMD_DEST/" 2>/dev/null || true
 fi
 
+# ── ลบ command เก่าที่เลิกใช้แล้ว (ชื่อซ้ำกับ skill ทำให้สับสน) ──────────────
+for old in thai-docx.md; do
+    if [ -f "$CMD_DEST/$old" ]; then rm -f "$CMD_DEST/$old"; echo "  ลบ command เก่า $old"; fi
+done
+
 echo "เสร็จแล้ว ติดตั้ง $count skill ไปที่ $DEST"
 echo "เปิด Claude Code ใหม่ (หรือเริ่ม session ใหม่) เพื่อให้เห็น skill"
