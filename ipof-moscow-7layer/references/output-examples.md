@@ -56,4 +56,5 @@ E01,FR06#moscow,M     ← ระดับที่เสนอ (เฉพาะ�
 ตรวจเทียบเอกสารอ้างอิง_V3.md
 แผนภาพ/ipof.png layers7.png context.png dataflow.png (+ .html)
 ```
+ก่อนสร้างไฟล์ .docx ให้โหลด `jdtaia-ieee-document` / `thai-docx` / `docx` และไฟล์ .xlsx โหลด `xlsx` ตามที่ติดตั้ง (SKILL.md หัวข้อ "ส่งออกเอกสาร")
 แจ้งผู้ใช้ให้บันทึกทุกไฟล์ไว้ในโฟลเดอร์โปรเจกต์

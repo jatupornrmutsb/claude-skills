@@ -1,142 +1,105 @@
 ---
 name: thai-docx
-description: "Use whenever creating or editing a .docx Word document that contains Thai-language text, alongside the base docx skill. Prevents common Thai-document corruption: font fallback breaking sara/vowel-tone rendering, table columns/margins shifting, and paragraph/line-spacing drift. Trigger whenever the user asks for a Word document, report, memo, or template with Thai content, or mentions เอกสาร, รายงาน, .docx ภาษาไทย, or complains about จัดหน้าเพี้ยน / ฟอนต์เพี้ยน / ตารางเลื่อน."
+description: "ใช้ทุกครั้งที่สร้าง/แก้ไฟล์ .docx ที่มีข้อความภาษาไทย (ใช้ร่วมกับ skill docx) โดยเฉพาะ บันทึกข้อความ หนังสือราชการ หนังสือภายใน/ภายนอก ตราครุฑ รายงาน หรือเมื่อผู้ใช้บ่นว่า จัดหน้าเพี้ยน ฟอนต์เพี้ยน สระ/วรรณยุกต์เพี้ยน ย่อหน้าเลื่อน ตารางเลื่อน ระยะบรรทัดผิด. มีสเปกบันทึกข้อความของหน่วยงาน (วัดจากไฟล์จริง) + ตัวสร้างเอกสาร scripts/make_memo.js + กับดักที่ทำให้ไฟล์ไทยเพี้ยน"
 ---
 
-# Thai DOCX Formatting Guardrails
+# Thai DOCX — กฎกันเพี้ยน + แบบบันทึกข้อความหน่วยงาน
 
-Companion to the base `docx` skill. Read that skill first for the general docx-js
-workflow (creation, editing, verification). This skill adds Thai-specific rules
-that prevent the most common failure modes: font fallback, table drift, and
-paragraph/spacing corruption.
+ใช้คู่กับ skill `docx` (อ่านก่อน) skill นี้เพิ่มเฉพาะเรื่องภาษาไทย/หนังสือราชการ
+ค่าทุกตัวในหมวด 3 **วัดจากไฟล์ตัวอย่างจริงของหน่วยงาน** (4 ไฟล์ บันทึกข้อความ) ไม่ใช่ค่าสมมติ
+หมายเหตุ: ทดสอบ render ด้วย LibreOffice เท่านั้น — ครั้งแรกให้ผู้ใช้เปิดใน Word จริง 1 ครั้งเพื่อยืนยัน
 
-## Why Thai .docx files break
+## 0. ลำดับงาน (ห้ามข้าม)
 
-Thai script combines base consonants with vowels (sara) and tone marks that
-render *above* or *below* the consonant, not inline. Word/LibreOffice rendering
-depends entirely on:
-1. A font that has correct Thai glyph positioning tables
-2. Text staying within single, correctly-tagged runs (not split across `\n` or
-   fragmented `Paragraph`/`TextRun` boundaries)
-3. Exact DXA-based sizing for tables and page setup (percentage-based sizing
-   renders inconsistently across Word/LibreOffice/Google Docs, and Thai text
-   reflows less predictably than Latin text when column widths are ambiguous)
+1. **ติดตั้งฟอนต์ไทยก่อน render ทุกครั้ง** — sandbox ไม่มี TH Sarabun ถ้าไม่ติดตั้ง LibreOffice จะ fallback เป็นฟอนต์อื่น (Loma) แล้วภาพที่ตรวจ **ไม่ใช่ของจริง** (ตัวกว้างต่าง ตัดบรรทัดต่าง)
+   `fc-list | grep -i sarabun` ถ้าว่าง → `python3 scripts/install_thai_fonts.py <ไฟล์ตัวอย่างที่ฝังฟอนต์ไว้>.docx`
+   (ถอดฟอนต์ที่ฝังใน .docx ของผู้ใช้ — ไม่ต้องดาวน์โหลดจากเน็ต)
+2. ถ้าเป็น **บันทึกข้อความ** → ใช้หมวด 3–4 (ตัวสร้าง `scripts/make_memo.js`) อย่าเขียนใหม่จากศูนย์
+3. ถ้าแก้ไฟล์เดิมของผู้ใช้ → แก้ใน XML ตาม skill docx แล้วดูหมวด 2 ว่าไฟล์เดิมมีกับดักอะไรบ้าง
+4. render → ดูภาพ → วัดตำแหน่งบรรทัด (หมวด 5) → ส่งไฟล์
 
-## Mandatory rules when generating Thai .docx with docx-js
+## 1. กฎทั่วไปสำหรับ docx-js ภาษาไทย
 
-### 1. Always set a Thai-safe font explicitly
-Never rely on the docx-js default font. Set it at the document defaults level
-AND per-run if mixing languages:
+- **ฟอนต์ตั้งชัดเจนทั้ง 4 ช่อง** `{ascii, hAnsi, cs, eastAsia}` และตั้ง default ระดับเอกสาร (ภาษาไทยใช้ช่อง `cs`) — หน่วยงานนี้ใช้ **TH SarabunPSK** (ไม่ใช่ TH Sarabun New) 16pt
+- **ระบุ `lineRule` เสมอ**: `spacing: { line: 240, lineRule: LineRuleType.AUTO }`
+  ถ้าใส่แค่ `line: 240` LibreOffice ตีเป็น *Exactly 12pt* → บรรทัดแน่นผิดปกติ (ต้นฉบับ 16pt ได้ ~18pt/บรรทัด) — **นี่คือกับดักที่เจอจริง**
+- `after: 0` ใน default (docx-js/Word default เว้นหลังย่อหน้า ทำให้ระยะเพี้ยน)
+- ห้าม `\n` ใน TextRun — แยก Paragraph
+- ย่อหน้าใช้ `indent.firstLine` — **ห้ามใช้ปุ่ม Tab / เว้นวรรคนำหน้า**
+- จัดตำแหน่งด้วย **tab stop + indent** เท่านั้น ห้ามใช้เว้นวรรคหลายตัว/NBSP ดันข้อความ
+- เส้นจุดไข่ปลา: ใช้ **dot leader tab stop** (`leader: LeaderType.DOT`) ห้ามวาดเส้น/รูปทรงลอยทับ
+- ตาราง: `columnWidths` + `width` ทุกเซลล์เป็น DXA, ผลรวมเท่ากับความกว้างตาราง, ห้าม PERCENTAGE
+- A4 = `11907 × 16840` DXA (ตรงกับไฟล์ Word ของผู้ใช้) ตั้งชัดเจน
+- ข้อความภาษาไทยก่อนใส่ไฟล์ต้องผ่าน **normalize** (มีใน make_memo.js: `clean()`):
+  - `ํา` (นิคหิต+สระอา U+0E4D U+0E32 — เกิดจาก copy จาก PDF) → `ำ` (U+0E33)
+  - NBSP / zero-width → เว้นวรรคปกติ, เว้นวรรคซ้อน → 1 ตัว
+  - เลขอารบิก → **เลขไทย** (หนังสือราชการหน่วยงานใช้เลขไทยทั้งหมด; ชื่อเฉพาะอังกฤษ เช่น Veeam คงเดิม)
 
-```javascript
-const doc = new Document({
-  styles: {
-    default: {
-      document: {
-        run: { font: "TH Sarabun New", size: 32 } // 32 half-points = 16pt, standard Thai doc size
-      }
-    }
-  },
-  // ...
-});
-```
+## 2. กับดักในไฟล์ต้นแบบของหน่วยงาน (สาเหตุที่ไฟล์เพี้ยนเมื่อเนื้อหาเปลี่ยน)
 
-Preferred fonts, in order: `TH Sarabun New` (Thai government standard, most
-compatible), `TH Sarabun PSK`, `Angsana New`. Avoid leaving font unset — the
-fallback font Word substitutes often lacks correct mark positioning, which is
-what causes สระ/วรรณยุกต์ to appear shifted or overlapping.
+| กับดัก | ผลที่เกิด | วิธีแก้ที่ตัวสร้างใช้ |
+|---|---|---|
+| เส้นประ ส่วนราชการ/ที่/วันที่/เรื่อง เป็น **รูปทรงเส้นลอย 4 เส้น** ตำแหน่งตายตัว | เรื่องยาว 2 บรรทัด → เส้นไม่ตามข้อความ | dot leader tab |
+| ย่อหน้าแรกใช้ **ปุ่ม Tab** (ขึ้นกับ tab stop ที่ซ่อนอยู่ เช่น 1276 vs 1440) | ย่อหน้าไม่เท่ากันระหว่างหน้า | `firstLine` |
+| ชื่อ/ตำแหน่งผู้ลงนามจัดด้วย **เว้นวรรค + indent มือ** | ชื่อยาวขึ้น → เลื่อนไม่กึ่งกลาง | จัดกึ่งกลางทั้งบล็อกด้วย indent เดียว |
+| สไตล์ Body Text มี **right indent −625** (ดันข้อความเลยขอบขวา) และ Normal = AngsanaUPC | ตัดบรรทัดต่างจากที่เห็นบนจอ/เครื่องอื่น | ไม่ใช้สไตล์นี้ ตั้งตรงๆ |
+| คำไทยถูกแยกเป็น run ทีละพยางค์ + `ํา` เสีย (copy จาก PDF) | ค้นหา/แก้ข้อความยาก, สระ ำ ผิด | `clean()` |
+| บางไฟล์ **ไม่ฝังฟอนต์** | เครื่องที่ไม่มี TH SarabunPSK เพี้ยนทันที | แนะนำติดตั้งฟอนต์ หรือ Word → Options → Save → Embed fonts |
+| ปน TH SarabunPSK กับ TH SarabunIT๙ ในไฟล์เดียว | ความกว้างตัวอักษรต่างกันเล็กน้อย | ใช้ SarabunPSK ตัวเดียว |
 
-### 2. Never use `\n` — always separate Paragraph elements
-This rule from the base docx skill is even more critical for Thai: a `\n`
-inside a single `TextRun` can cause the line-break to interact badly with
-Thai mark stacking and produce visibly shifted spacing on the wrapped line.
+## 3. สเปกบันทึกข้อความ (วัดจากไฟล์จริงของหน่วยงาน)
 
-```javascript
-// WRONG
-new Paragraph({ children: [new TextRun("บรรทัดที่ 1\nบรรทัดที่ 2")] })
+| รายการ | ค่า |
+|---|---|
+| กระดาษ / ขอบ | A4, ขอบ **1 นิ้วทุกด้าน (1440 DXA)**, header/footer 720 — *ไม่ใช่* ซ้าย 3/ขวา 2 ซม. ตามคู่มือทั่วไป |
+| ฟอนต์ | TH SarabunPSK; เนื้อหา 16pt; ป้ายกำกับ (ส่วนราชการ/ที่/วันที่/เรื่อง) **20pt หนา**; "บันทึกข้อความ" **28pt หนา** กึ่งกลาง (คู่มือเขียน 29pt แต่ไฟล์จริงใช้ 28) |
+| ระยะบรรทัด | Single (240 auto), after 0 → ได้ ~18.1pt/บรรทัดเนื้อหา, ~22.6pt/บรรทัด 20pt |
+| ตราครุฑ | 2.19 × 1.98 ซม. ลอยแบบ page-relative H=922020 EMU, V=584835 EMU, wrapNone, **1 รูปต่อบันทึก** |
+| ส่วนหัว | ส่วนราชการ (tab 1474) / ที่ (tab 400) … วันที่ (tab stop 4253, ค่า 5130) / เรื่อง (hanging 680, THAI_DISTRIBUTE) จุดไข่ปลาถึงขอบขวา (RIGHT tab 9027 leader dot) |
+| เรียน | before 6pt (120), tab stop 600 |
+| เนื้อหา | **2 ย่อหน้า**: ภาคเหตุ ("ตามที่ …/ตามหนังสือ … นั้น") + ภาคความประสงค์ ("ในการนี้ …") — THAI_DISTRIBUTE, before 6pt, firstLine **1276** (บันทึกเสนอ) หรือ **1440** (ฉบับส่งออก) |
+| เอกสารแนบ | (ถ้ามี) รายการเลขไทย `๑.` hanging indent ต่อท้ายภาคความประสงค์ |
+| คำลงท้าย | "จึงเรียนมาเพื่อโปรดพิจารณา" (บันทึกเสนอ) / "…เพื่อทราบ" (ฉบับส่งออก) before 6pt, `keepNext` |
+| ลายเซ็น | เว้น ~60pt (before 1200) แล้ว **ชื่อในวงเล็บ** + **ตำแหน่ง** จัดกึ่งกลาง (left indent 1700), `keepNext/keepLines` กันลายเซ็นหลุดไปหน้าใหม่ลำพัง |
+| Footer | รูปคำขวัญหน่วยงาน 5.84 × 1.09 ซม. กึ่งกลาง (inline ใน footer) |
+| คู่เอกสาร | ไฟล์หนึ่งมักมี **2 บันทึกต่อกัน**: ① บันทึกเสนอ (`ที่ ตย. ๑/๒๕๖๙`, เรียน ผู้อำนวยการสำนักงานตัวอย่าง ผ่าน รองผู้อำนวยการ, ลงชื่อหัวหน้างาน) ② ฉบับส่งออก (`ที่ ตย ๐๐๐๐/`, วันที่เว้นเลขวันไว้เขียนมือ, ลงชื่อหัวหน้าหน่วยงาน) — แยกหน้าด้วย `pageBreakBefore` |
 
-// RIGHT
-new Paragraph({ children: [new TextRun("บรรทัดที่ 1")] }),
-new Paragraph({ children: [new TextRun("บรรทัดที่ 2")] }),
-```
+เติมคุณสมบัติที่ไม่มีในต้นฉบับ → ถามผู้ใช้ก่อน อย่าเดา (เช่น หนังสือภายนอก ชั้นความเร็ว)
 
-### 3. Page size: set explicitly, never rely on default
-docx-js defaults to A4, which is usually correct for Thai documents, but set
-it explicitly so it's never ambiguous:
-
-```javascript
-page: {
-  size: { width: 11906, height: 16838 }, // A4 in DXA (1440 = 1 inch)
-  margin: { top: 1440, bottom: 1440, left: 1440, right: 1440 } // 1" margins, adjust to match required template
-}
-```
-
-If following a Thai government/university template (e.g. RMUTSB memo format),
-margins are often non-default (commonly 2.5cm/1cm variants) — confirm the
-required margin values from the template before generating, rather than
-using generic 1-inch margins.
-
-### 4. Tables: dual DXA widths, always
-This is the single most common cause of "ตารางเลื่อน":
-- Set `columnWidths` (array, DXA) on the `Table` itself
-- Set `width: { size: <matching value>, type: WidthType.DXA }` on **every
-  cell** in every row
-- The `columnWidths` array values must sum to the table's total width
-- Never use `WidthType.PERCENTAGE` — it is the most common source of drift
-  between Word, LibreOffice, and Google Docs
-
-```javascript
-new Table({
-  columnWidths: [3000, 6000], // sums to 9000 DXA
-  rows: [
-    new TableRow({
-      children: [
-        new TableCell({ width: { size: 3000, type: WidthType.DXA }, children: [...] }),
-        new TableCell({ width: { size: 6000, type: WidthType.DXA }, children: [...] }),
-      ]
-    })
-  ]
-})
-```
-
-### 5. Line/paragraph spacing: set explicitly for Thai
-Thai text with tone marks needs slightly more line spacing than pure Latin
-text to avoid marks from adjacent lines visually colliding. Set explicit
-`spacing` rather than relying on Word defaults:
-
-```javascript
-new Paragraph({
-  children: [...],
-  spacing: { line: 360, lineRule: LineRuleType.AUTO, after: 120 } // 360 = 1.5 line spacing (240=single)
-})
-```
-
-### 6. Verify before delivering — non-negotiable for Thai docs
-Follow the base docx skill's verification step every time, with extra
-attention to Thai-specific defects:
+## 4. ใช้ตัวสร้าง `scripts/make_memo.js`
 
 ```bash
-python scripts/office/soffice.py --headless --convert-to pdf output.docx
-pdftoppm -jpeg -r 100 output.pdf page
+# docx (npm) ติดตั้งไว้แล้ว — ถ้า require('docx') ไม่เจอ ให้ export NODE_PATH=$(npm root -g)
+node scripts/make_memo.js memo.json out.docx
 ```
 
-Then visually inspect (`view` the resulting images) specifically for:
-- Sara/vowel marks sitting at the wrong height or overlapping the consonant
-- Table column widths matching what was specified (not compressed/expanded)
-- Consistent margins across all pages, especially page 2+ after a table or
-  image
-- Line spacing consistent across paragraphs (no visually "tight" or
-  "loose" lines mixed together)
+`memo.json` (ดู `examples/`):
+```json
+{ "memos": [ {
+  "dept": "สำนักงานตัวอย่าง งานบริหารทั่วไป โทร. 1234",
+  "no": "ตย. 1/2569", "date": "17 กรกฎาคม 2569",
+  "subject": "...", "to": "ผู้อำนวยการสำนักงานตัวอย่าง ผ่าน รองผู้อำนวยการ (ผศ.สมศรี รักงาน)",
+  "paras": ["ภาคเหตุ ... นั้น", "ในการนี้ ..."],
+  "items": ["(ไม่บังคับ) เอกสารแนบ"],
+  "closing": "จึงเรียนมาเพื่อโปรดพิจารณา",
+  "name": "(นายสมชาย ใจดี)", "position": "หัวหน้างานบริหารทั่วไป",
+  "indent": 1276 } ] }
+```
+- ใส่เลขอารบิกได้ ตัวสร้างแปลงเป็นเลขไทยเอง; `date` ที่เว้นวันไว้ให้ใส่ช่องว่างนำหน้า (คงไว้)
+- ใส่ได้หลาย memo ใน `memos[]` (ได้หลายหน้าในไฟล์เดียว)
+- รูปอยู่ใน `assets/` (ถ้าหาย ดึงจากไฟล์ตัวอย่างของผู้ใช้: `word/media/` — ตราครุฑ ~227×195px, คำขวัญอยู่ใน footer)
+- ถ้า `scripts/make_memo.js` ไม่มี ให้สร้างตามตารางหมวด 3 + กฎหมวด 1
 
-If any of these look wrong, the fix is almost always one of: font not set
-explicitly (#1), a stray `\n` (#2), or percentage-based table widths (#4) —
-check those three first before re-deriving from scratch.
+## 5. ตรวจก่อนส่ง (ต้องทำจริง ไม่ใช่แค่ดูตา)
 
-## Quick checklist before sending a Thai .docx to the user
+```bash
+fc-list | grep -i sarabun                                   # ต้องมีฟอนต์
+python3 scripts/office/soffice.py --headless --convert-to pdf out.docx   # (path ของ skill docx)
+pdffonts out.pdf                                            # ต้องเห็น THSarabunPSK ไม่ใช่ Loma/DejaVu
+pdftoppm -jpeg -r 80 out.pdf pg                             # แล้ว Read ภาพทุกหน้า
+python3 scripts/linepos.py ต้นฉบับ.pdf out.pdf              # เทียบ y ทุกบรรทัด
+python3 scripts/office/validate.py out.docx
+```
+ผ่านเมื่อ: y ของ title/ส่วนราชการ/ที่/เรื่อง/เรียน/ย่อหน้า/ลายเซ็น ต่างจากต้นฉบับ ≤ ~1pt, ไม่มีบรรทัดจุดไข่ปลาว่างเกิน, ลายเซ็นไม่ตกหน้าลำพัง, ไม่มี `ํา` เหลือ, ไม่มีเลขอารบิกในเนื้อหาไทย
 
-- [ ] Font set explicitly in document defaults (TH Sarabun New or equivalent)
-- [ ] No `\n` anywhere in TextRun content
-- [ ] Page size and margins set explicitly (not left to default)
-- [ ] All tables have matching `columnWidths` + per-cell DXA `width`
-- [ ] Paragraph `spacing` set explicitly where line spacing matters
-- [ ] Rendered to PDF → JPEG and visually inspected before delivering
+อาการ → สาเหตุที่ควรเช็กก่อน: บรรทัดแน่น (ไม่ใส่ lineRule) · ตัวหนาเพี้ยน/กว้างต่าง (ไม่มีฟอนต์ใน sandbox) · เส้นไม่ตามข้อความ (ใช้รูปทรงลอยแทน leader) · ลายเซ็นเอียง (จัดด้วยเว้นวรรค) · ย่อหน้าไม่เท่ากัน (ใช้ Tab แทน firstLine)
