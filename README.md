@@ -204,11 +204,33 @@ git push                         # 3. ส่งขึ้น GitHub ทันท�
    git reset --hard origin/master
    ```
 2. **repo นี้เป็น Public — ห้ามใส่รูปหรือชื่อจริง** (ภาพคำขวัญหน่วยงาน, ชื่อคน, เลขที่หนังสือจริง) ลงใน repo
-   ให้เก็บไว้ที่ `~/.claude/skill-private/<ชื่อ skill>/` โดยวางโครงโฟลเดอร์เหมือนใน skill เช่น
-   `~/.claude/skill-private/thai-docx/assets/footer_slogan.png`
-   สคริปต์ติดตั้งจะคัดลอกไฟล์ในนี้ทับให้ทุกครั้ง โฟลเดอร์นี้ไม่ขึ้น GitHub ถ้าเครื่องอื่นต้องใช้ด้วย ให้คัดลอกไปเองครั้งเดียว
+   ให้เก็บไว้ที่ `~/.claude/skill-private/<ชื่อ skill>/` ดู[วิธีเก็บไฟล์จริงใน skill-private](#วิธีเก็บรูปหรือชื่อจริงไว้ใน-skill-private)
 3. **skill ในแอป Claude (claude.ai / Desktop) ไม่อัปเดตตาม repo ให้เอง** — แก้แล้วต้องอัปโหลด zip ใหม่ทุกครั้ง (ดู[วิธี](#ใช้ในแอป-claude-claudeai--desktop))
    ⚠️ zip ใน Releases สร้างจาก repo จึงมีแต่ไฟล์ตัวแทน (เช่น รูปคำขวัญของ `thai-docx` เป็นกรอบเปล่า) skill ที่มีไฟล์ใน `skill-private` ให้ทำ zip จากเครื่องที่ติดตั้งแล้วแทน คือบีบอัดโฟลเดอร์ `~/.claude/skills/<ชื่อ skill>` ทั้งโฟลเดอร์ (ให้ใน zip มี `<ชื่อ skill>/SKILL.md`) หรือสั่ง Claude Code ว่า "ทำ zip ของ skill thai-docx ให้"
+
+### วิธีเก็บรูปหรือชื่อจริงไว้ใน skill-private
+
+หลักการ: วางไฟล์จริงไว้ใน `~/.claude/skill-private/` โดยใช้ path เดียวกับใน skill ส่วนใน repo ใส่แค่ **ไฟล์ตัวแทนชื่อเดียวกัน** ตอนรัน `install.ps1` (หรือ `install.sh`) สคริปต์จะคัดลอกไฟล์จริงทับไฟล์ตัวแทนให้เอง
+
+| ใน repo (Public) — ไฟล์ตัวแทน | ในเครื่อง — ไฟล์จริง |
+|---|---|
+| `thai-docx/assets/footer_slogan.png` (กรอบเปล่า) | `~/.claude/skill-private/thai-docx/assets/footer_slogan.png` |
+| `thai-docx/examples/memo.example.json` (ชื่อสมมติ) | `~/.claude/skill-private/thai-docx/examples/memo.example.json` |
+
+ตัวอย่าง: เก็บไฟล์ตัวอย่างที่มีชื่อจริงของ `thai-docx`
+
+```powershell
+New-Item -ItemType Directory -Force "$HOME\.claude\skill-private\thai-docx\examples"
+Copy-Item "ไฟล์ที่มีชื่อจริง.json" "$HOME\.claude\skill-private\thai-docx\examples\memo.example.json"
+cd ~\Documents\claude-skills
+.\install.ps1
+```
+
+ข้อควรจำ:
+
+- **ห้ามวางไฟล์จริงไว้ในโฟลเดอร์ repo** (`~\Documents\claude-skills`) แม้ชั่วคราว เพราะ `git add -A` จะเก็บเข้าไปด้วย
+- **ก่อน push ดูรายชื่อไฟล์ด้วย `git status --short` ทุกครั้ง** ว่าไม่มีไฟล์จริงหลุดเข้ามา
+- `skill-private` ไม่ขึ้น GitHub ถ้าเครื่องอื่นต้องใช้ ให้คัดลอกโฟลเดอร์นี้ไปเอง (เช่น USB หรือ Google Drive ส่วนตัว) แล้วรัน `install.ps1`
 
 ## อัปเดตจากต้นฉบับ (utarn/engineer-skills)
 
