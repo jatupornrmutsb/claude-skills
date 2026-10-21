@@ -146,7 +146,7 @@ function build(spec) {
     styles: {
       default: {
         document: {
-          run: { font: FONT_ALL, size: 32, language: { value: 'th-TH', eastAsia: 'th-TH', bidirectional: 'th-TH' } },
+          run: { font: FONT_ALL, size: 32, language: { value: 'en-US', eastAsia: 'en-US', bidirectional: 'th-TH' } },
           paragraph: { spacing: { before: 0, after: 0, line: 240, lineRule: LineRuleType.AUTO } },   // single — ต้องระบุ lineRule เสมอ
         },
       },
