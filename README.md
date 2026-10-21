@@ -8,7 +8,9 @@
 ## เริ่มต้นแบบง่าย (Windows)
 
 **ใช้ในแอป Claude (หน้าแชต claude.ai / Claude Desktop)** → ไม่ต้องทำอะไร skill ที่อัปโหลดไว้แล้วผูกกับบัญชี ล็อกอินบัญชีเดิมก็ใช้ได้เลย
-แก้ skill แล้วอยากอัปเดตในแอป → ดาวน์โหลด zip จาก [Releases](../../releases/tag/skills-latest) แล้วอัปโหลดทับ (ดู[วิธี](#ใช้ในแอป-claude-claudeai--desktop))
+แก้ skill แล้วอยากอัปเดตในแอป → ดาวน์โหลด zip จาก [Releases](../../releases/tag/skills-latest) แล้วอัปโหลดทับ (ดู[วิธี](#ใช้ในแอป-claude-claudeai--desktop)) — ยกเว้น skill ที่มีไฟล์ส่วนตัว เช่น `thai-docx` ดู[กฎข้อ 3](#กฎ-3-ข้อ)
+
+**จะแก้ skill** → อ่าน[แก้ skill](#แก้-skill-อ่านก่อนแก้ทุกครั้ง)ก่อน (pull ก่อนแก้, ห้าม `--force`, ห้ามใส่ข้อมูลจริง)
 
 **ใช้ใน Claude Code** → ต้องมี [Git](https://git-scm.com) ในเครื่อง แล้วทำ 2 ขั้นนี้
 
@@ -173,6 +175,40 @@ cd claude-skills
 git pull
 ./install.sh          # Windows: .\install.ps1
 ```
+
+## แก้ skill (อ่านก่อนแก้ทุกครั้ง)
+
+ใช้ได้ทุกเครื่องที่ clone repo นี้ไว้ (เช่น `~\Documents\claude-skills`)
+
+```powershell
+cd ~\Documents\claude-skills
+git pull                         # 1. ดึงของใหม่ก่อนเริ่มแก้ทุกครั้ง
+# 2. แก้ไฟล์
+git add -A
+git commit -m "แก้อะไร"
+git push                         # 3. ส่งขึ้น GitHub ทันทีที่แก้เสร็จ
+.\install.ps1                    # 4. อัปเดต skill ในเครื่องนี้ (Linux/WSL: ./install.sh)
+```
+
+เครื่องอื่นที่จะใช้เวอร์ชันใหม่: `git pull` แล้ว `.\install.ps1` จากนั้นเปิด Claude Code ใหม่
+
+### กฎ 3 ข้อ
+
+1. **`git pull` ก่อนแก้ทุกครั้ง** — ถ้าไม่ pull ก่อน แล้วเครื่องอื่น push ไปแล้ว `git push` จะไม่ผ่าน
+   **ห้ามแก้ด้วย `git push --force`** เพราะจะลบงานบน GitHub ที่มาจากเครื่องอื่นทิ้ง ให้ `git pull` แล้ว push ใหม่แทน
+   ถ้า pull ไม่ผ่าน (เช่น ประวัติบน GitHub ถูกเขียนใหม่) ให้เก็บไฟล์ที่ยังไม่ commit ไว้ก่อน แล้วทำให้เครื่องตรงกับ GitHub:
+   ```powershell
+   git status --short                     # ต้องว่าง ถ้าไม่ว่างให้เก็บไฟล์ไว้ก่อน
+   git fetch origin
+   git log --oneline origin/master..HEAD  # commit ที่มีแค่ในเครื่องนี้ จะหายหลังคำสั่งถัดไป
+   git reset --hard origin/master
+   ```
+2. **repo นี้เป็น Public — ห้ามใส่รูปหรือชื่อจริง** (ภาพคำขวัญหน่วยงาน, ชื่อคน, เลขที่หนังสือจริง) ลงใน repo
+   ให้เก็บไว้ที่ `~/.claude/skill-private/<ชื่อ skill>/` โดยวางโครงโฟลเดอร์เหมือนใน skill เช่น
+   `~/.claude/skill-private/thai-docx/assets/footer_slogan.png`
+   สคริปต์ติดตั้งจะคัดลอกไฟล์ในนี้ทับให้ทุกครั้ง โฟลเดอร์นี้ไม่ขึ้น GitHub ถ้าเครื่องอื่นต้องใช้ด้วย ให้คัดลอกไปเองครั้งเดียว
+3. **skill ในแอป Claude (claude.ai / Desktop) ไม่อัปเดตตาม repo ให้เอง** — แก้แล้วต้องอัปโหลด zip ใหม่ทุกครั้ง (ดู[วิธี](#ใช้ในแอป-claude-claudeai--desktop))
+   ⚠️ zip ใน Releases สร้างจาก repo จึงมีแต่ไฟล์ตัวแทน (เช่น รูปคำขวัญของ `thai-docx` เป็นกรอบเปล่า) skill ที่มีไฟล์ใน `skill-private` ให้ทำ zip จากเครื่องที่ติดตั้งแล้วแทน คือบีบอัดโฟลเดอร์ `~/.claude/skills/<ชื่อ skill>` ทั้งโฟลเดอร์ (ให้ใน zip มี `<ชื่อ skill>/SKILL.md`) หรือสั่ง Claude Code ว่า "ทำ zip ของ skill thai-docx ให้"
 
 ## อัปเดตจากต้นฉบับ (utarn/engineer-skills)
 
