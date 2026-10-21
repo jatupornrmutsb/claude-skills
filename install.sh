@@ -4,7 +4,7 @@
 # ใช้งาน:
 #   ./install.sh                     # รันจากโฟลเดอร์ repo ที่ clone มาแล้ว
 #   ./install.sh --skip-in-progress  # ไม่ติดตั้ง skill กลุ่มทดลอง (in-progress)
-#   t=$(mktemp -d) && gh repo clone jatupornrmutsb/claude-skills "$t" -- --depth 1 --quiet && "$t/install.sh"; rm -rf "$t"
+#   t=$(mktemp -d) && git clone --depth 1 --quiet https://github.com/jatupornrmutsb/claude-skills.git "$t" && "$t/install.sh"; rm -rf "$t"
 
 set -euo pipefail
 

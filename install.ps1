@@ -3,7 +3,7 @@
 # ใช้งาน:
 #   .\install.ps1                     # รันจากโฟลเดอร์ repo ที่ clone มาแล้ว
 #   .\install.ps1 -SkipInProgress     # ไม่ติดตั้ง skill กลุ่มทดลอง (in-progress)
-#   $t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); gh repo clone jatupornrmutsb/claude-skills $t -- --depth 1 --quiet; & "$t\install.ps1"; Remove-Item -Recurse -Force $t
+#   $t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); git clone --depth 1 --quiet https://github.com/jatupornrmutsb/claude-skills.git $t; & "$t\install.ps1"; Remove-Item -Recurse -Force $t
 
 param(
     [switch]$SkipInProgress

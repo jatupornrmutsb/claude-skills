@@ -10,25 +10,17 @@
 **ใช้ในแอป Claude (หน้าแชต claude.ai / Claude Desktop)** → ไม่ต้องทำอะไร skill ที่อัปโหลดไว้แล้วผูกกับบัญชี ล็อกอินบัญชีเดิมก็ใช้ได้เลย
 แก้ skill แล้วอยากอัปเดตในแอป → ดาวน์โหลด zip จาก [Releases](../../releases/tag/skills-latest) แล้วอัปโหลดทับ (ดู[วิธี](#ใช้ในแอป-claude-claudeai--desktop))
 
-**ใช้ใน Claude Code** → ทำ 4 ขั้นนี้ครั้งเดียวต่อเครื่อง
+**ใช้ใน Claude Code** → ต้องมี [Git](https://git-scm.com) ในเครื่อง แล้วทำ 2 ขั้นนี้
 
 1. เปิด **PowerShell** (กด Start พิมพ์ `PowerShell` แล้วเปิด)
-2. ติดตั้ง GitHub CLI (ข้ามได้ถ้ามีแล้ว) แล้ว**ปิดและเปิด PowerShell ใหม่**
+2. คัดลอกบรรทัดนี้ไปวางแล้วกด Enter
    ```powershell
-   winget install GitHub.cli
-   ```
-3. ล็อกอิน GitHub (ทำครั้งเดียว) ตอบตามค่าเริ่มต้นโดยกด Enter แล้วล็อกอินในเบราว์เซอร์ที่เปิดขึ้นมา
-   ```powershell
-   gh auth login
-   ```
-4. คัดลอกบรรทัดนี้ไปวางแล้วกด Enter
-   ```powershell
-   $t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); gh repo clone jatupornrmutsb/claude-skills $t -- --depth 1 --quiet; powershell -ExecutionPolicy Bypass -File "$t\install.ps1"; Remove-Item -Recurse -Force $t
+   $t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); git clone --depth 1 --quiet https://github.com/jatupornrmutsb/claude-skills.git $t; powershell -ExecutionPolicy Bypass -File "$t\install.ps1"; Remove-Item -Recurse -Force $t
    ```
    ขึ้นข้อความ `เสร็จแล้ว ติดตั้ง ... skill` แปลว่าติดตั้งเสร็จแล้ว
 
 จากนั้นเปิด Claude Code ใหม่ แล้วพิมพ์ `/jdtaia` จะเห็นคำสั่งขึ้นมา
-**อยากได้เวอร์ชันใหม่ล่าสุด** → ทำแค่ขั้นที่ 4 ซ้ำ
+**อยากได้เวอร์ชันใหม่ล่าสุด** → ทำขั้นที่ 2 ซ้ำ
 
 รายละเอียดเพิ่มเติม (Linux/WSL, ตัวเลือกอื่น) อยู่ที่หัวข้อ [ติดตั้งบนเครื่องอื่น](#ติดตั้งบนเครื่องอื่น)
 
@@ -130,10 +122,10 @@ skill ชื่อเดียวกันที่มีอยู่แล้�
 
 ### Windows (PowerShell)
 
-ใช้คำสั่งเดียว ใช้ได้ทั้งติดตั้งครั้งแรกและอัปเดต ต้องมี [GitHub CLI](https://cli.github.com/) ที่ล็อกอินแล้ว (`gh auth login`) เพราะ repo เป็น Private:
+ใช้คำสั่งเดียว ใช้ได้ทั้งติดตั้งครั้งแรกและอัปเดต:
 
 ```powershell
-$t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); gh repo clone jatupornrmutsb/claude-skills $t -- --depth 1 --quiet; powershell -ExecutionPolicy Bypass -File "$t\install.ps1"; Remove-Item -Recurse -Force $t
+$t = Join-Path $env:TEMP ("cs-" + [guid]::NewGuid()); git clone --depth 1 --quiet https://github.com/jatupornrmutsb/claude-skills.git $t; powershell -ExecutionPolicy Bypass -File "$t\install.ps1"; Remove-Item -Recurse -Force $t
 ```
 
 หรือ clone ไว้ในเครื่อง:
@@ -152,10 +144,10 @@ cd claude-skills
 ./install.sh
 ```
 
-หรือติดตั้งโดยไม่ต้อง clone เอง (repo เป็น Private จึงต้องใช้ [GitHub CLI](https://cli.github.com/) ที่ `gh auth login` แล้ว):
+หรือติดตั้งโดยไม่ต้องเก็บโฟลเดอร์ไว้:
 
 ```bash
-t=$(mktemp -d) && gh repo clone jatupornrmutsb/claude-skills "$t" -- --depth 1 --quiet && "$t/install.sh"; rm -rf "$t"
+t=$(mktemp -d) && git clone --depth 1 --quiet https://github.com/jatupornrmutsb/claude-skills.git "$t" && "$t/install.sh"; rm -rf "$t"
 ```
 
 > **WSL:** WSL กับ Windows มี `~/.claude` แยกกัน ถ้าใช้ Claude Code ทั้งสองฝั่ง ต้องติดตั้งทั้งสองฝั่ง
