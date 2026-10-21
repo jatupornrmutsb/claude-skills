@@ -78,5 +78,17 @@ for old in thai-docx.md; do
     if [ -f "$CMD_DEST/$old" ]; then rm -f "$CMD_DEST/$old"; echo "  ลบ command เก่า $old"; fi
 done
 
+# ── ไฟล์ส่วนตัวที่ไม่ขึ้น GitHub (เช่น ภาพคำขวัญหน่วยงานจริง) ─────────────────
+# วางโครงเดียวกับ ~/.claude/skills ไว้ที่ ~/.claude/skill-private เช่น
+# skill-private/thai-docx/assets/footer_slogan.png แล้วจะถูกคัดลอกทับทุกครั้งที่ติดตั้ง
+PRIVATE="$HOME/.claude/skill-private"
+for dir in "$PRIVATE"/*/; do
+    [ -d "$dir" ] || continue
+    name="$(basename "$dir")"
+    [ -d "$DEST/$name" ] || continue
+    cp -R "$dir". "$DEST/$name/"
+    echo "  ใส่ไฟล์ส่วนตัวของ $name"
+done
+
 echo "เสร็จแล้ว ติดตั้ง $count skill ไปที่ $DEST"
 echo "เปิด Claude Code ใหม่ (หรือเริ่ม session ใหม่) เพื่อให้เห็น skill"

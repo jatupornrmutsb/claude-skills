@@ -67,6 +67,19 @@ try {
         if (Test-Path $f) { Remove-Item -Force $f; Write-Host "  ลบ command เก่า $old" }
     }
 
+    # ── ไฟล์ส่วนตัวที่ไม่ขึ้น GitHub (เช่น ภาพคำขวัญหน่วยงานจริง) ─────────────
+    # วางโครงเดียวกับ ~/.claude/skills ไว้ที่ ~/.claude/skill-private เช่น
+    # skill-private\thai-docx\assets\footer_slogan.png แล้วจะถูกคัดลอกทับทุกครั้งที่ติดตั้ง
+    $Private = Join-Path $HOME '.claude\skill-private'
+    if (Test-Path $Private) {
+        Get-ChildItem $Private -Directory | ForEach-Object {
+            if (Test-Path (Join-Path $Dest $_.Name)) {
+                Copy-Item -Recurse -Force (Join-Path $_.FullName '*') (Join-Path $Dest $_.Name)
+                Write-Host "  ใส่ไฟล์ส่วนตัวของ $($_.Name)"
+            }
+        }
+    }
+
     Write-Host "เสร็จแล้ว ติดตั้ง $count skill ไปที่ $Dest"
     Write-Host 'เปิด Claude Code ใหม่ (หรือเริ่ม session ใหม่) เพื่อให้เห็น skill'
 } finally {
